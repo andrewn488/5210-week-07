@@ -1,0 +1,207 @@
+---
+title: 'Participation Assignment #7'
+author: "Andrew Nalundasan"
+date: "August 5, 2021"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Course: OMSBA 5210, Seattle Univeristy
+# Purpose: Participation Assignment #7
+# Date: August 5, 2021
+# Author: Andrew Nalundasan
+```
+
+# ggforce
+
+This extension is used to enhance ggplots by: 
+
++ highlighting data groupings
+
++ focus attention on specific areas of the plot
+    
+ggforce was intended for the use in data exploration rather than explanation. I agree with this, especially after creating my visual using geom_parallel_sets(). My second visual uses facet_zoom() which may help in certain situations for explanation but probably not for every situation. ggforce contains functions that we're already familiar with from ggplot: 
+
++ geoms
+
++ stats
+
++ facets
+
+I've created visuals using geom_parallel_sets() and facet_zoom() from the ggforce package. I start with some data wrangling and show a few iterations of the visuals as I built them out. Comments are embedded with the code along with likes/dislikes about what I see regarding the visuals. Similar to the other packages we've worked with, it needs to be installed first (install.packages("ggforce")).
+
+More information can be found in the following articles:
+
++ https://rviews.rstudio.com/2019/09/19/intro-to-ggforce/
+
++ https://ggforce.data-imaginist.com/
+
+# Load Libraries
+
+```{r}
+# The tidyverse package contains ggplot2, dplyr, and several other packages
+library(tidyverse)
+
+# NHK special
+library(vtable)
+
+# to get $ and , on axis in graph
+library(scales)
+
+# Extension for ggplot that this assignment focuses on
+library(ggforce)
+```
+
+# Load data
+
+```{r}
+# Load and prepare data 
+zillow <- read_csv("../02_raw_data/qp1_data.csv")
+
+# look at the data
+head(zillow, 10)
+```
+
+# Plot using geom_parallel_sets() 
+
++ geom_parallel helps you visualize interactions between categorical variables
+
++ I'll use home 'condition' and 'waterfront' as the categorical variables that I want to visualize
+
+```{r}
+# wrangle the data how you want it to show up in the visual
+p <- zillow %>% 
+  mutate(waterfront = as.character(waterfront)) %>%    # change from numerical to character
+  mutate(condition = as.character(condition)) %>%      # change from numerical to character
+  mutate(waterfront = str_replace_all(waterfront, "0", "Not Waterfront")) %>%   # change binary to actual factor name
+  mutate(waterfront = str_replace_all(waterfront, "1", "Waterfront")) %>%       # change binary to actual factor name
+  mutate(waterfront = as.factor(waterfront)) %>% 
+  mutate(condition = str_replace_all(condition, "1", "Condition 1")) %>%        # update category name for all conditions
+  mutate(condition = str_replace_all(condition, "2", "Condition 2")) %>%
+  mutate(condition = str_replace_all(condition, "3", "Condition 3")) %>%
+  mutate(condition = str_replace_all(condition, "4", "Condition 4")) %>%
+  mutate(condition = str_replace_all(condition, "5", "Condition 5")) %>% 
+  select(condition, waterfront)
+
+
+p %>%
+  gather_set_data(1:2) # create single input for every combo of categorical variables
+  
+```
+
+```{r}
+# parallel to alluvial visual
+p %>%
+  gather_set_data(1:2) %>%                            # creates 'id', 'x', and 'y' columns
+  ggplot(aes(x, id = id, split = y, value = 1))  +    # set up the ggplot
+  geom_parallel_sets(aes(fill = waterfront))          # set waterfront to be what condition is being mapped to
+```
+
+**Comments**
+
++ Shows how conditions of home relates to either waterfront or not waterfront
+
++ I don't know which condition is which
+
+```{r}
+# updates to visual
+p %>%
+  gather_set_data(1:2) %>%
+  ggplot(aes(x, id = id, split = y, value = 1))  +
+  geom_parallel_sets(aes(fill = waterfront)) +
+  geom_parallel_sets_axes(axis.width = 0.1) +    # axis width of labels
+  geom_parallel_sets_labels()                    # defaults to vertical rotation
+```
+
+**Comments**
+
++ This visual includes labels for each category: condition on the left and waterfront on the right. 
+
++ The colored lines/bars show which condition of homes are classified as either waterfront or not waterfront
+
++ Lines are hard to decipher because colored in solid (no transparency)
+
++ Can't see the parallel axis labels because the boxes are filled in black with black label text 
+
++ Variable labels are vertical
+
+```{r}
+# more updates to visual
+p %>%
+  gather_set_data(1:2) %>%
+  ggplot(aes(x, id = id, split = y, value = 1))  +
+  geom_parallel_sets(aes(fill = waterfront), show.legend = FALSE, alpha = 0.5) +      # hide legend and make colors transparent
+  geom_parallel_sets_axes(axis.width = 0.1, color = "grey", fill = "white") +    # changes outline and fill of parallel set axes
+  geom_parallel_sets_labels(angle = 0) +    # 0 angle makes labels horizontal
+  #theme_no_axes() +     # remove x and y axes
+  theme(axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        panel.border = element_blank()) +   # remove border around visual
+  labs(title = "Representation of home condition and waterfront properties",          # add title and subtitle
+       subtitle = "All Waterfront properties are condition 3 and above")
+```
+
+**Comments**
+
++ Changed parallel set axis labels to be horizontal
+
++ Changed parallel set axis boxes to white fill with grey outlines so they can be seen
+
++ Increased color transparency so you can see what's going on
+
++ Removed x axis labels
+
+This is a cool visual to show a relationship between categorical variables. I can't really tell exactly how much is in which category since the y axis is so far away. I can't tell how many of each home is either Waterfront or Not Waterfront. But from this visual, it can be inferred that Waterfront properties are rare. It can also be inferred that the vast majority of homes are Condition 3. This would be good for data exploration but it doesn't explain much. 
+
+# Plot using facet_zoom()
+
++ creates two plots: one with the whole picture, the other with a zoomed in view into something specific
+
++ creates both "macro" and "micro" view into your data with one visual
+
++ I'll look at how home renovations drive median home price 
+
+```{r}
+# line graph with facet zoom
+zillow %>% 
+  filter(yr_renovated > 1990) %>%   
+  group_by(yr_renovated) %>% 
+  summarize(med_price = median(price)) %>% 
+  ggplot(mapping = aes(x = yr_renovated, y = med_price)) +   # set up ggplot
+  geom_smooth(se = FALSE) +        # line graph without standard error
+  scale_y_continuous(labels = dollar_format(scale = .000001, suffix = "M", prefix = "")) +    # format y-axis numbers
+  facet_zoom(xlim = c(2000, 2001, 2002, 2003, 2004, 2005), split = TRUE) +     # set which years you want to zoom in on 
+  theme_light() +     # helps to show the grey shading for highlight (from 2000-2005)
+  labs(x = "Year Renovated",    # add labels 
+       y = "Median Home Price (USD)",
+       title = "Median home price drops with recent renovations",
+       subtitle = "Price spikes between 2000-2005") + 
+  
+  theme(panel.grid.major = element_blank(),    # remove grid lines from the background
+        panel.grid.minor = element_blank())
+```
+
+**Comments**
+
++ shows relationship of median home prices from 1990-2015 to show long-term trend
+
++ zoom in on 2000-2005 to point out something interesting (increase in price)
+
++ I like how the grey shading highlights what the visual is zooming in on 
+
++ I dislike the y-axis on the 2nd visual. Lots of white space below
+
++ I wish I could swap the size of the two charts. The first one should be bigger than the second one in my opinion. But I guess that's the point in zooming in on something - to make it bigger
+
+       

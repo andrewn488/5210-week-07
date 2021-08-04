@@ -1,0 +1,210 @@
+---
+title: "How/where are Starbucks located?"
+author: "Check out the storyboard layout - good for a presentation"
+output: 
+  flexdashboard::flex_dashboard:
+    storyboard: true
+    source: embed
+---
+```{r setup, echo = FALSE}
+# Note "setup" above sets settings for all code chunks below
+```
+
+```{r}
+# Course: 5210 Communicating Data
+# Purpose: Show storyboard layout, leaflet and maps
+# Date: August 5, 2019
+# Author: Gareth Green
+
+```
+
+```{r}
+# Load librarys
+library(tidyverse)
+library(flexdashboard) # For storyboard template, note YAML setting
+library(leaflet) # Mapping html widget
+library(maps) # For number of Starbucks choropleth map of US and WA
+
+```
+
+### Starbucks is a Seattle Institution
+
+<div style="text-align: center"> <font size="10"> Starbucks is a Seattle Institution </div>
+<br>
+<div style="text-align: center"> ![](star4.jpg) </div>
+
+### Where was the original Starbucks, zoom and see!
+
+```{r}
+# Map coordinates of the first Starbucks, leaflet does the rest
+leaflet() %>%
+  addTiles() %>%
+  addMarkers(lng = -122.3435, lat = 47.6106,  
+             popup="The first Starbucks opened in 1971") %>% 
+  setView(lng = -122.3435, lat = 47.6106, zoom = 17)
+
+```
+
+***
+```{r}
+# The three *** above create a panel for text
+```
+
+
+The map is from the [leaflet](https://rstudio.github.io/leaflet/) package
+
+- It is an htmlwidget package
+
+- Interactive panning/zooming
+
+- Compose maps using arbitrary combinations of map tiles, markers, polygons, lines, popups, and GeoJSON
+
+- Create maps right from the R console or RStudio
+
+- Embed maps in knitr/R Markdown documents and Shiny apps
+
+- Use map bounds and mouse events to drive Shiny logic
+
+
+### Are there other Starbucks near by??
+
++ Zoom out to see other Starbucks in Seattle
+
+```{r}
+# Load data on all the US starbucks locations
+# Got the data from http://www.compciv.org/files/datadumps/practicum/us-starbucks-distant.csv
+starbucks <- read.csv("starbucks.csv")
+
+```
+
+```{r}
+# Show just the Seattle Starbucks 
+starbucks %>% 
+  filter(City == "Seattle") %>% 
+  leaflet() %>%
+    addTiles() %>% 
+    addMarkers(lng = -122.3435, lat = 47.6106, 
+               popup = "The first Starbucks") %>% 
+    addMarkers(~Longitude, ~Latitude, label = ~as.character(Name)) %>% 
+    setView(lng = -122.3435, lat = 47.6106, zoom = 18)
+
+```
+
+
+### How many Starbucks there are in the US??
+
++ Yikes, the data set indicates there are `r dim(starbucks)[1]` Starbucks in the US
+
+```{r}
+# Show all Starbucks in the US
+starbucks %>%
+  leaflet() %>%
+    addTiles() %>%
+    addMarkers(~Longitude, ~Latitude, label = ~as.character(Name))
+
+```
+
+
+### How are Starbucks stores distributed by state?? Show the distribution with a choropleth, i.e. map colored by a measure.
+
+
+
+```{r}
+# Convert state abbreviation to state name
+starbucks$state <- setNames(state.name, state.abb)[starbucks$Country.Subdivision]
+
+# Convert state to all lower cases to match map_data and calculate how many SB per state
+starb_map <- starbucks %>% 
+  mutate(region = str_to_lower(state)) %>% 
+  group_by(region) %>% 
+#  filter(region != "alaska", region != "hawaii") %>% 
+  summarise(n = n())  
+
+# Map the number of starbucks per state with choropleth
+map_data("state") %>% 
+  left_join(starb_map, by = "region") %>%  # Join by region, which is state
+  arrange(group, order) %>%  # Order so draws correctly
+  ggplot(aes(x = long, y = lat, group = group, fill = n)) +
+    geom_polygon(color = "black") +
+    theme_void() +
+    scale_fill_continuous(name = "Number of\nStarbucks", 
+                          low = "light blue", high = "navy") + # Adjust fill color
+    coord_fixed(1.4)
+
+```
+
+### How are Starbucks stores distributed **per capita** by state??
+
++ Whoa, look at North Dakota and West Virgina!
+
+```{r}
+# 2019 population estimate from http://worldpopulationreview.com/states/
+pop <- read.csv("us_pop_data.csv") %>% 
+  mutate(region = str_to_lower(State))  
+
+# Map the number of starbucks per state with choropleth
+map_data("state") %>% 
+  left_join(starb_map, by = "region") %>%  # Join by region, which is state
+  left_join(pop, by = "region") %>%  # Join by region, which is state
+  mutate(n = n/Pop*1000000) %>% # Starbucks per million people
+  arrange(group, order) %>%  # Order so draws correctly
+  ggplot(aes(x = long, y = lat, group = group, fill = n)) +
+    geom_polygon(color = "black") +
+    theme_void() +
+    scale_fill_continuous(name = "Number of\nStarbucks\nper Million\nPeople", 
+                          low = "light blue", high = "navy") + # Adjust fill color
+    coord_fixed(1.4)
+
+```
+
+
+
+
+```{r}
+# # 2019 population estimate from http://worldpopulationreview.com/states/
+# pop <- read.csv("us_pop_data.csv") %>% 
+#   mutate(region = str_to_lower(State))  
+# 
+# %>% 
+#   filter(region != "alaska", region != "hawaii")
+# 
+# # Calculate center of state for labels
+# st_cent <- map_data("state") %>% 
+#   group_by(region) %>% 
+#   summarise(mean_long = mean(long), mean_lat = mean(lat))
+# 
+# %>% 
+#   filter(region != "alaska", region != "hawaii")
+# 
+# # Map the number of starbucks per state with choropleth
+# map_data("state") %>% 
+#   left_join(star_map, by = "region") %>%  # Join by region, which is state
+#   left_join(pop, by = "region") %>%  # Join by region, which is state
+#   left_join(st_cent, by = "region") %>%  # Join by region, which is state
+#   mutate(n = n/Pop*1000000) %>% # Starbucks per million people
+#   filter(region != "district of columbia") %>% 
+#   mutate(st_abb = setNames(state.abb, state.name)[State]) %>% # Create label
+#   arrange(group, order) %>%  # Order so draws correctly
+#   ggplot(aes(x = long, y = lat, group = group, fill = n)) +
+#     geom_polygon(color = "black") +
+#     geom_text(aes(mean_long, mean_lat, label = st_abb), size=4, color = "white") +
+#     theme_void() +
+#     scale_fill_continuous(name = "Number of\nStarbucks\nper Million\nPeople", 
+#                           low = "light blue", high = "navy") # Adjust fill color
+# 
+# state <- map_data("world", c("USA", "hawaii")) %>% 
+#   group_by(region) %>% 
+#   summarize(m = mean(long))
+# 
+# us_map <- fortify(us, region="name")
+# 
+# z<-map_data(c("state", "hawaii", "alaska")) %>% 
+#   left_join(star_map, by = "region") %>%  # Join by region, which is state
+#   left_join(pop, by = "region") %>%  # Join by region, which is state
+#   left_join(st_cent, by = "region") %>% 
+#   group_by(region, State) %>% 
+#   summarize(m = mean(long))
+# 
+
+
+```

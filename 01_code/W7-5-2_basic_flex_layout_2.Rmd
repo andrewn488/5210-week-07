@@ -1,0 +1,69 @@
+---
+title: "Flexdashboard layouts, part 2"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r echo = FALSE}
+# Course: 5210 Communicating Data
+# Purpose: Illustrate flexdashboard package layouts, part 2
+# Date: August 5, 2019
+# Author: Gareth Green
+
+```
+
+```{r echo = FALSE}
+# Clear environment of variables and functions
+rm(list = ls(all = TRUE)) 
+
+# Clear environmet of packages
+if(is.null(sessionInfo()$otherPkgs) == FALSE)lapply(paste("package:", names(sessionInfo()$otherPkgs), sep=""), detach, character.only = TRUE, unload = TRUE)
+
+```
+
+```{r echo = FALSE}
+# Load packages
+library(flexdashboard)
+
+```
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### Main finding {data-height=600}
+
+```{r}
+
+```
+
+### Supporting point {data-height=387}
+
+```{r}
+
+```
+
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### Recommendations {data-height=200}
+
++ Bullet point 1
+
++ Bullet point 2
+
+
+### Supporting point {data-height=400}
+
+```{r}
+
+```
+
+### Supporting point {data-height=400}
+
+```{r}
+
+```
+

@@ -1,0 +1,120 @@
+---
+title: "Mean Boxes sold sorted by Ad, Promotion and Volume----Continue promotions, but examine individual brand performance (Bad Visuals)"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r echo = FALSE}
+# Course: 5210 Communicating Data
+# Purpose: Illustrate a poorly designed dashboard
+# Date: August 5, 2019
+# Author: Gareth Green
+
+```
+
+```{r echo = FALSE}
+# Clear environment of variables and functions
+rm(list = ls(all = TRUE)) 
+
+# Clear environmet of packages
+if(is.null(sessionInfo()$otherPkgs) == FALSE)lapply(paste("package:", names(sessionInfo()$otherPkgs), sep=""), detach, character.only = TRUE, unload = TRUE)
+
+```
+
+
+```{r setup, include=FALSE}
+
+# Load packages
+library(flexdashboard)
+library(tidyverse)
+
+# Load data
+dat <- read_csv("../02_raw_data/W7-4-1_mtp.csv")
+
+```
+
+
+
+Column {data-width=550}
+-----------------------------------------------------------------------
+
+### How do brands vary by volume, boxes sold and promotion? {data-height=700}
+
+```{r fig.width = 10, fig.height = 10}
+# Facets seperating scatter ploty by brand
+ggplot(dat, aes(x = volume, y = units)) +
+  geom_jitter(aes(color = as.factor(promo))) +
+  geom_point(aes(color = as.factor(promo))) +
+  facet_wrap(~ brand)  +
+  labs(color = "Promotion") +
+  scale_color_discrete(labels = c("No","Yes")) +
+  labs(x = "Volume of Boxes", y = "Boxes sold per week") +
+  ggtitle("More units sold with promotion") +
+  theme_bw() + 
+  theme(text = element_text(size = 20),
+        strip.background = element_rect(fill = "white"))
+
+#        strip.text.x = element_text(labels = function(x) str_wrap(x, width = 15)))
+
+```
+
+### Mean units sold by ad and promotion {data-height=225}
+
+```{r}
+# Table 
+knitr::kable(dat %>%
+  group_by(ad, promo) %>%
+  summarise(ad_mu = round(mean(units), 2)) %>% 
+  spread(promo, ad_mu)
+)
+```
+
+### Other examples {data-height=100}
+  
+Here are examples of [other page layouts](https://rmarkdown.rstudio.com/flexdashboard/examples.html)
+
+
+Column {data-width=450}
+-----------------------------------------------------------------------
+
+### How do ads impact boxes sold?
+
+```{r}
+# How do mean units sold vary with ad and promo
+dat %>%
+  group_by(ad, promo) %>%
+  summarise(ad_mp = mean(units), ad_sdp = sd(units)) %>%
+  left_join(count(group_by(dat, ad, promo))) %>%
+  mutate(se = ad_sdp/sqrt(n)) %>%
+  ggplot(aes(x = ad, y = ad_mp, fill = as.factor(promo))) +
+    geom_bar(stat = "identity", position = "dodge") +
+    geom_errorbar(aes(ymin = ad_mp - se, ymax = ad_mp + se), 
+                  width = 0.3, position = position_dodge(0.9)) +
+    labs(fill = "Promotion") +
+    scale_fill_discrete(labels = c("No","Yes")) +
+    scale_x_discrete(labels = c("Large","Medium/Small","None")) +
+    labs(x = "Ad Type", y = "Mean boxes with\nStandard Error Bars") +
+    ggtitle("Ads only impact units sold if there\nis a promotion") +
+    theme(text = element_text(size = 15)) +
+    theme_classic()
+
+```
+
+### Box sizes clusters in 3 volumes 
+
+```{r}
+# Scatter with volume and units contour but seperate by promo (a factor variable)
+ggplot(dat, aes(x = volume, y = units)) +
+  geom_point(aes(color = as.factor(promo))) +
+  stat_density2d(aes(color = as.factor(promo)), size = 0.9) +
+  labs(color = "Promotion") +
+  scale_color_discrete(labels = c("No","Yes")) +
+  labs(x = "Volume per Box in lbs", y = "Boxes sold per week") +
+  ggtitle("Volume is clustered in diffrent sizes\nMore boxes sold when promotion") +
+  theme(text = element_text(size = 15)) +
+  theme_classic()
+
+```
+

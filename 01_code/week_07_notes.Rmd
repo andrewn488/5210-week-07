@@ -1,0 +1,236 @@
+---
+title: "week_07_notes"
+author: "Andrew Nalundasan"
+date: "7/31/2021"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# load libraries
+library(tidyverse)
+library(ggiraph)
+library(vtable)
+```
+
+# Overview video
+
++ Evaluating quality of visualizations and dashboards
+
+    - Best tool to have is your own gut
+        - Look at it, and ask if it's easy to interpret
+        - What do you think it means?
+    - Communication is always geared towards the audience. Not yourself
+    - Get rid of legends
+        - at minimum: legend.position to move the legend from the side to on the graph
+        - label the lines, bars, points instead of relying on legends
+    - Dashboards
+        - Make it extremely apparent what each graph should show
+        - Put the conclusion of the graph as the title
+        - use scales package to format numbers
+            - "scale", "mark", "label" arguments to format the numbers even more
+        - use ggiraph over plotly package for interactive dashboards and graphs
+
++ Don't just create something and be done with it
+
+    - Must know how to communicate it to the audience
+    - Audience wants to know the insight that comes from the data, not about the work that you did
+    - "Does the visual get the point across?"
+        - Goal: create something that people can interpret and learn from
+
+# Dissecting Visuals
+
++ Finding the story in the data isn't enough. Also need to communicate the story
+
++ Use what I want the audience to know to guide my design choices
+
+    1. Type of graph
+    2. context to provide
+    3. Emphasize and de-emphasize
+    4. Order and alignment of information
+    5. Titles, labels, and annotations
+    
++ When making a visual, consider:
+
+    1. Who is your audience and what do you want them to learn/do?
+    2. Choose the type of graph that best highlights your data for your purpose
+        - 1 variable: histogram or density
+        - summaries of data: bar graph
+        - showing a relationship: scatter plot or variation
+        - motion: line graph
+    3. Order of the visual
+        - where are my eyes drawn
+        - order the data
+        - color, size
+        what to emphasize/de-emphasize
+    4. Use text, labels, legends, annotations, context appropriately
+        - tell the audience what I want them to know
+        
++ mean: removes the influence of total number of observations
+    
+    - removes skewedness of the data
+    - makes relative comparisons. normalizes the groups on the same scale
+    - relative comparisons show **effectiveness** of differe A/B groups
+    
++ relative comparison
+    
+# Lessons in Storytelling
+
++ the hard work comes from creating the story out of the data
+
+    - Finding the story is done in the EDA and is the easy part
+    - The art comes from finding out how to make a communication
+    - it's not a mystery on how to do it. 
+    - the mystery is taking the time to learn the audience and give them what they need to know
+    
++ storytelling techniques to engage your audience
+
+    1. Move from "showing the data" to "using the data to address an issue"
+        - showing data does not provide solutions to the problem
+    2. Think about storytelling in movies and plays
+        - **Beginning** - introduce characters, relationships, and issues to draw audience in
+        - **Middle** - examing alternatives for characters to resolve an issue or conflict
+        - **End** - recommend a course of action
+    3. Relate to storytelling with data by comparing a movie in my presentation
+        - Use the 3-act structure as a model for communication/presentation
+    4. Conventional presentation is generally bulleted facts
+        - Just the facts. Not linked to context or woven together
+        - Showing the data-not telling the story of the data
+        - Easier because not finding the story
+    5. Every data set has a story
+        - FInding and telling a story is more challenging than conventional rhetoric
+        - Story tells how and why business practice is changing
+            - Resolution/Recommendation: bring business back into balance 
+    6. Story can be revealed by asking key questions
+        - Main character should usually be the **AUDIENCE**
+        - Use stories to engage the audience in a way that "just the facts" cannot
+        
+    
++ storytelling
+
+    - Beginning:
+        - Why important/care?
+        - set up
+        - context
+        - staekholders
+        - big picture
+        - introduce issue
+    - Middle:
+        - conflict
+        - determine alternatives
+        - learn about alternatives
+        - consider options
+        - weight trade-offs
+        - determine recommendation
+    - End: 
+        - Resolution
+        - REcommendation
+        - Course of action
+        - Restore balance
+        - Justified by analysis in middle
+        - Commit, but accept input
+
++ story design, writing
+
+    1. Brain dump first - then fill in and edit to complete thoughts - IDEAS
+    2. Determine main topic of each idea into a paragraph
+        - Group similar topics and reorder
+    3. Review each paragraph
+        - Make it flow
+    4. Review each sentence
+    
++ story telling tactics
+
+    1. Backward design/reverse storyboarding
+        - Terentino their ass!
+    2. Horizontal logic
+        - Ensure paragraphs are in order
+    3. Vertical logic
+        - Ensure all information in each slide belongs
+        - Sentences are in order
+    4. Know your audience
+        - Speak in the same language as the audience
+    5. Fresh perspective
+        - Have a 3rd party review and give feedback
+        
++ Presentation vs. Visuals
+
+    - Presentation > Dashboard > individual visual
+    
++ **LEAVE ENOUGH TIME IN WORK FLOW TO CREATE**
+
+    - Visuals that are:
+        - Intentional
+        - Meaningful
+        - Clear/concise
+        - Elegant
+    - **AUDIENCE ONLY SEES THE COMMUNICATION**
+
+# Dashboards - Best Practices
+
++ Dashboard: 
+    
+    - Collection of visuals that are related to answering a specific problem
+    - Contain information to achieve an objective
+    - Consolidated on a single page or screen
+    - Must consider audience for best design
+
++ Don't want to try to make a dashboard that shows everything. It won't work
+
++ Dashboard mistakes
+
+    1. Exceeding the boundaries of a single screen
+    2. Supplying inadequate context for the data
+    3. Display excessive detail
+    4. Expressing measures indirectly is a mistake
+    5. Choosing inappropriate display
+    6. Introducing meaningless variety
+    7. Using poorly designed display
+    8. Encoding quantitative information inaccurately
+        - Treat each element as an individual visual
+    9. Arranging information poorly
+    10. Highlighting important information ineffectively or not at all
+
+# Dashboards - Examples
+
++ using "W7-4-1_bad_dash.RMD" and "W7-4-2_bad_dash.Rmd"
+
++ dashboard needs to convey a message. 
+
++ dashboard needs to drive what the audience is meant to learn from it
+
++ error bars not appropriate for non-technical audience
+
++ flexdashboard helps create the structure to build dashboards on
+
+# Dashboards - Basic Flexdashboard Layout
+
++ dashboards should be 1 pagers - no tabs
+
++ all about the YAML to drive the structure
+
+    - orientation: row vs. column
+
+# Dashboards - Starbucks Storyboard
+
++ using a dashboard to make a slideshow - do this for QP2?
+
++ YAML:
+    
+    - storyboard: true
+    - source: embed
+
++ choropleth map is colored by measure
+
+# Dashboards - Create a basic Flexdashboard
+
+
+

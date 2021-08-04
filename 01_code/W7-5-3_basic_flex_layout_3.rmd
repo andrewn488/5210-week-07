@@ -1,0 +1,162 @@
+---
+title: "Flexdashboard layouts, part 3"  
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: column
+    vertical_layout: fill
+    
+---
+
+```{r echo = FALSE}
+# Course: 5210 Communicating Data
+# Purpose: Illustrate flexdashboard package layouts, part 3
+# Date: August 5, 2019
+# Author: Gareth Green
+
+```
+
+```{r echo = FALSE}
+# Clear environment of variables and functions
+rm(list = ls(all = TRUE)) 
+
+# Clear environmet of packages
+if(is.null(sessionInfo()$otherPkgs) == FALSE)lapply(paste("package:", names(sessionInfo()$otherPkgs), sep=""), detach, character.only = TRUE, unload = TRUE)
+
+```
+
+```{r echo = FALSE}
+# Load packages
+library(flexdashboard)
+
+```
+
+
+Page 1 - Many dashboards are only one page
+=======================================================================
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### Chart A - the "---" create a new area on the dashboard
+
+```{r}
+
+```
+
+Output for Chart A would go here
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### Chart B - notice how this chart is in a new column
+
++ If instead used "orientation: row" in YAML this would be below previous chart area  
+
+    - not depend on word "Column" in code, depends on "------"
+    - column or row is set in YAML
+
+```{r}
+
+```
+
+### Chart C - notice this chart is to the right because used fill: row
+
+```{r}
+
+```
+
+Output for Chart C would go here
+
+
+Page 2
+=======================================================================
+
+Column {.tabset data-width=250}
+-----------------------------------------------------------------------
+### Area 1, Tab 1
+
+{.tabset} - creates tab on same page  
+
++ Multiple tabs are not appropriate in many settings  
+
+```{r}
+
+```
+
+### Tab 2
+Stuff on tab 2
+
+```{r}
+
+```
+
+### Tab 3
+Stuff on tab 3
+
+```{r}
+
+```
+
+Column {data-width=250}
+-----------------------------------------------------------------------
+### Area 4
+
+```{r}
+
+```
+
+Output for area 4 would go here
+
+
+Column {data-width=250}
+-----------------------------------------------------------------------
+### Area 5
+
+```{r}
+
+```
+
+Output for area 5 would go here
+
+
+Column {data-width=250}
+-----------------------------------------------------------------------
+### Area 6
+
+```{r}
+
+```
+
+Output for area 6 would go here
+
+
+Page 3
+=======================================================================
+
+Sidebar {.sidebar}
+-----------------------------------------------------------------------
+
+Sidebar for shiny inputs {.sidebar}
+
+
+Column {data-width=250}
+-----------------------------------------------------------------------
+### Area 7
+
+```{r}
+
+```
+
+Output for area 7 would go here
+
+
+Column {data-width=250}
+-----------------------------------------------------------------------
+### Area 8
+
+```{r}
+
+```
+
+Output for area 8 would go here
